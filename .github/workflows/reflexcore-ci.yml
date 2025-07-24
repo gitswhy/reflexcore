@@ -1,0 +1,30 @@
+name: ReflexCore CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install click cryptography
+
+    - name: Run ReflexCore Test Suite
+      run: |
+        chmod +x scripts/gitswhy_initiate.sh scripts/gitswhy_gpuoverclock.sh scripts/gitswhy_quantumflush.sh scripts/gitswhy_autoclean.sh scripts/gitswhy_vaultsync.sh modules/gitswhy_coremirror.sh
+        chmod +x gitswhy_vault_manager.py
+        ./test_all.sh 

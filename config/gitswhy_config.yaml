@@ -1,0 +1,102 @@
+overclock_enabled: true
+vault_sync_enabled: true
+entropy_flush_enabled: true
+auto_clean_enabled: true
+core_monitor_enabled: true
+dns_flush_enabled: true
+network_flush_enabled: true
+ui_reset_enabled: true
+entropy_refresh_enabled: true
+zombie_kill_enabled: true
+cache_clear_enabled: true
+memory_free_enabled: true
+temp_clean_enabled: true
+keystroke_monitoring_enabled: true
+
+# Gitswhy OS ReflexCore Configuration
+# File: config/gitswhy_config.yaml
+
+# System Performance Settings
+performance:
+  overclock_enabled: true
+  swappiness: 10
+  vfs_cache_pressure: 50
+  clear_caches: true
+  max_cpu_temp: 85
+  performance_mode: "high"
+
+# Background Process Intervals (seconds)
+intervals:
+  entropy_flush_interval: 300
+  auto_clean_interval: 3600
+  core_monitor_interval: 60
+  vault_sync_interval: 1800
+
+# Feature Toggles
+features:
+  vault_sync_enabled: true
+  auto_optimization: true
+  system_monitoring: true
+  cache_management: true
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  max_log_size: "100MB"
+  rotation_days: 30
+
+# Security Settings
+security:
+  secure_vault: true
+  encryption_enabled: true
+  backup_retention: 10
+
+# Quantum Flush Settings
+quantum_flush:
+  dns_flush_enabled: true
+  network_flush_enabled: true
+  ui_reset_enabled: true
+  entropy_refresh_enabled: true
+  restart_network_manager: true
+  reset_gnome_settings: false
+
+# Advanced Flush Options
+flush_options:
+  aggressive_cache_clear: true
+  preserve_clipboard: false
+  entropy_generation_timeout: 10
+  network_stabilization_delay: 3
+
+# Auto Clean Settings
+auto_clean:
+  zombie_kill_enabled: true
+  cache_clear_enabled: true
+  memory_free_enabled: true
+  temp_clean_enabled: true
+  cache_age_days: 7
+  memory_threshold_percent: 80
+
+# Clean Thresholds
+clean_thresholds:
+  max_cache_size_mb: 500
+  max_temp_size_mb: 1000
+  min_free_disk_percent: 10
+  zombie_check_interval: 300
+
+# Core Mirror Keystroke Monitoring
+core_mirror:
+  keystroke_monitoring_enabled: true
+  hesitation_threshold: 2.0
+  hesitation_alerts_enabled: true
+  json_logging_enabled: true
+
+# Monitoring Thresholds
+monitoring_thresholds:
+  typing_speed_wpm: 40
+  pause_detection_sensitivity: 0.5
+  session_timeout_minutes: 30
+  max_log_entries: 10000
+
+vault:
+  vault_password: "gitswhy_default_vault_password_2025"
+  vault_key_iterations: 100000

@@ -1,0 +1,85 @@
+# Python-specific ignores
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Bash/Shell and script artifacts
+*.log
+*.bak
+*.tmp
+*.swp
+*.swo
+*.out
+nohup.out
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Project-specific ignores
+~/.gitswhy/
+events.log
+overclock.log
+vault.json
+vault_backup_*
+vault.salt
+*.test
+test_results/
+temp_events*
+
+# VS Code and editor files
+.vscode/*
+!.vscode/tasks.json  # Keep if you want to commit tasks
+*.code-workspace
+.idea/
+*.sublime-*
+.vscode-server/
+
+# GitHub Actions and CI artifacts
+.github/workflows/*.yml~
+*.cache
+.cache/
+
+# Environment and config backups
+*.env
+*.bak
+*.old
+config/*.yaml.bak
+
+# Miscellaneous
+node_modules/
+npm-debug.log
+yarn-error.log
+*.zip
+*.tar.gz
+*.rar 
