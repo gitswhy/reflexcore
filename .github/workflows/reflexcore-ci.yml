@@ -33,4 +33,40 @@ jobs:
       env:
         CI: true
       run: |
-        ./test_all.sh 
+        bash test_all.sh
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install ShellCheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y shellcheck
+
+    - name: Lint Bash scripts
+      run: |
+        shellcheck scripts/*.sh modules/*.sh test_all.sh || true
+
+    - name: Run Python tests
+      run: |
+        python3 testall.py
+
+    - name: Run full test suite
+      env:
+        CI: true
+      run: |
+        chmod +x test_all.sh scripts/*.sh modules/*.sh
+        bash test_all.sh 

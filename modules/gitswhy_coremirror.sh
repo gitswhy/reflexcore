@@ -106,7 +106,8 @@ log_json_event() {
     mkdir -p "$LOG_DIR"
     
     # Create JSON log entry
-    local timestamp=$(get_iso_timestamp)
+    local timestamp
+    timestamp=$(get_iso_timestamp)
     local json_entry="{\"timestamp\": \"$timestamp\", \"script\": \"coremirror\", \"event_type\": \"$event_type\", \"message\": \"$message\", \"interval\": $interval, \"keystroke\": \"$keystroke\", \"hesitation_threshold\": $HESITATION_THRESHOLD}"
     echo "$json_entry" >> "$LOG_FILE"
 }
@@ -221,12 +222,14 @@ check_hesitation() {
     
     if [[ -n "$LAST_KEYSTROKE_TIME" ]]; then
         # Calculate interval using high-precision arithmetic
-        local interval=$(echo "$current_time - $LAST_KEYSTROKE_TIME" | bc -l 2>/dev/null || echo "0")
+        local interval
+        interval=$(echo "$current_time - $LAST_KEYSTROKE_TIME" | bc -l 2>/dev/null || echo "0")
         
         # Check if interval exceeds threshold
         if (( $(echo "$interval > $HESITATION_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
             # Format interval to 2 decimal places
-            local formatted_interval=$(printf "%.2f" "$interval")
+            local formatted_interval
+            formatted_interval=$(printf "%.2f" "$interval")
             
             # Print hesitation alert
             if [[ "$ALERT_ENABLED" == "true" ]]; then
@@ -265,10 +268,12 @@ monitor_keystrokes() {
     
     while [[ "$MONITORING_ACTIVE" == true ]]; do
         # Get current timestamp
-        local current_time=$(get_timestamp)
+        local current_time
+        current_time=$(get_timestamp)
         
         # Read single keystroke
-        local keystroke=$(read_keystroke)
+        local keystroke
+        keystroke=$(read_keystroke)
         
         # Handle Ctrl+C
         if [[ "$keystroke" == "CTRL+C" ]]; then
