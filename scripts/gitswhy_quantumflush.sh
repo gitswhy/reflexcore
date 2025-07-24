@@ -127,22 +127,26 @@ show_system_status() {
     
     # DNS cache status
     if command_exists resolvectl; then
-        local cache_size=$(resolvectl statistics 2>/dev/null | grep "Current Cache Size" | awk '{print $4}' || echo "unknown")
+        local cache_size
+        cache_size=$(resolvectl statistics 2>/dev/null | grep "Current Cache Size" | awk '{print $4}' || echo "unknown")
         log_action "DEBUG" "DNS Cache Size: $cache_size entries"
     fi
     
     # Network status
-    local network_connections=$(ss -tuln 2>/dev/null | wc -l || echo "unknown")
+    local network_connections
+    network_connections=$(ss -tuln 2>/dev/null | wc -l || echo "unknown")
     log_action "DEBUG" "Active network connections: $network_connections"
     
     # Entropy status
     if [[ -f "/proc/sys/kernel/random/entropy_avail" ]]; then
-        local entropy=$(cat /proc/sys/kernel/random/entropy_avail)
+        local entropy
+        entropy=$(cat /proc/sys/kernel/random/entropy_avail)
         log_action "DEBUG" "Available entropy: $entropy bits"
     fi
     
     # Memory status
-    local mem_used=$(free | grep Mem | awk '{printf "%.1f", ($3/$2)*100}')
+    local mem_used
+    mem_used=$(free | grep Mem | awk '{printf "%.1f", ($3/$2)*100}')
     log_action "DEBUG" "Memory usage: ${mem_used}%"
 }
 
@@ -276,7 +280,8 @@ flush_network_caches() {
     
     # Reset network statistics
     if command_exists ss; then
-        local before_connections=$(ss -tuln 2>/dev/null | wc -l)
+        local before_connections
+        before_connections=$(ss -tuln 2>/dev/null | wc -l)
         log_action "DEBUG" "Network connections before flush: $before_connections"
     fi
     
@@ -383,7 +388,8 @@ refresh_system_entropy() {
     
     # Check current entropy level
     if [[ -f "/proc/sys/kernel/random/entropy_avail" ]]; then
-        local entropy_before=$(cat /proc/sys/kernel/random/entropy_avail)
+        local entropy_before
+        entropy_before=$(cat /proc/sys/kernel/random/entropy_avail)
         log_action "INFO" "Current entropy pool: $entropy_before bits"
     fi
     
@@ -416,7 +422,8 @@ refresh_system_entropy() {
     
     # Check entropy after refresh
     if [[ -f "/proc/sys/kernel/random/entropy_avail" ]]; then
-        local entropy_after=$(cat /proc/sys/kernel/random/entropy_avail)
+        local entropy_after
+        entropy_after=$(cat /proc/sys/kernel/random/entropy_avail)
         log_action "INFO" "Entropy pool after refresh: $entropy_after bits"
         
         if [[ $entropy_after -gt ${entropy_before:-0} ]]; then
@@ -446,7 +453,8 @@ verify_flush_success() {
     
     # Verify DNS cache was cleared
     if command_exists resolvectl; then
-        local cache_size=$(resolvectl statistics 2>/dev/null | grep "Current Cache Size" | awk '{print $4}' || echo "0")
+        local cache_size
+        cache_size=$(resolvectl statistics 2>/dev/null | grep "Current Cache Size" | awk '{print $4}' || echo "0")
         if [[ "${cache_size:-0}" -eq 0 ]]; then
             log_action "INFO" "✓ DNS cache verified as cleared"
         else
@@ -456,12 +464,14 @@ verify_flush_success() {
     
     # Verify network state
     sleep 2  # Allow time for network changes to take effect
-    local network_connections=$(ss -tuln 2>/dev/null | wc -l || echo "0")
+    local network_connections
+    network_connections=$(ss -tuln 2>/dev/null | wc -l || echo "0")
     log_action "DEBUG" "Current network connections: $network_connections"
     
     # Check entropy levels
     if [[ -f "/proc/sys/kernel/random/entropy_avail" ]]; then
-        local current_entropy=$(cat /proc/sys/kernel/random/entropy_avail)
+        local current_entropy
+        current_entropy=$(cat /proc/sys/kernel/random/entropy_avail)
         if [[ $current_entropy -gt 100 ]]; then
             log_action "INFO" "✓ Entropy pool verified as healthy ($current_entropy bits)"
         else
@@ -471,7 +481,8 @@ verify_flush_success() {
     fi
     
     # Check system responsiveness
-    local load_avg=$(uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//')
+    local load_avg
+    load_avg=$(uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//')
     log_action "DEBUG" "System load average: $load_avg"
     
     if [[ "$verification_passed" == "true" ]]; then

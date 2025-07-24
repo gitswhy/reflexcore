@@ -173,8 +173,10 @@ kill_zombie_processes() {
     log_action "CLEAN" "Scanning for zombie processes..."
     
     # Find zombie processes and their parent PIDs
-    local zombie_pids=($(ps -eo pid,ppid,stat,cmd | awk '$3=="Z" {print $1}' 2>/dev/null || true))
-    local parent_pids=($(ps -eo pid,ppid,stat,cmd | awk '$3=="Z" {print $2}' 2>/dev/null || true))
+    local zombie_pids
+    zombie_pids=($(ps -eo pid,ppid,stat,cmd | awk '$3=="Z" {print $1}' 2>/dev/null || true))
+    local parent_pids
+    parent_pids=($(ps -eo pid,ppid,stat,cmd | awk '$3=="Z" {print $2}' 2>/dev/null || true))
     
     if [[ ${#zombie_pids[@]} -eq 0 ]]; then
         log_action "INFO" "✓ No zombie processes found"
@@ -334,7 +336,8 @@ free_system_resources() {
         mem_total=$(free -m | grep Mem | awk '{print $2}')
         mem_before=${mem_before:-0}
         mem_total=${mem_total:-1}
-        local mem_percent_before=$(( (mem_before * 100) / mem_total ))
+        local mem_percent_before
+        mem_percent_before=$(( (mem_before * 100) / mem_total ))
         
         log_action "DEBUG" "Memory usage before cleanup: ${mem_percent_before}% (${mem_before}MB/${mem_total}MB)"
         
@@ -375,7 +378,8 @@ free_system_resources() {
         local mem_after
         mem_after=$(free -m | grep Mem | awk '{print $3}')
         mem_after=${mem_after:-0}
-        local mem_percent_after=$(( (mem_after * 100) / mem_total ))
+        local mem_percent_after
+        mem_percent_after=$(( (mem_after * 100) / mem_total ))
         local mem_freed
         mem_freed=$((mem_before - mem_after))
         

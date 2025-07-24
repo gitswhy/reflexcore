@@ -56,9 +56,10 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y shellcheck
 
-    - name: Lint Bash scripts
+    - name: Lint Bash scripts (warnings only)
       run: |
-        shellcheck scripts/*.sh modules/*.sh test_all.sh || true
+        echo "Running ShellCheck (warnings only, not fatal)..."
+        shellcheck scripts/*.sh modules/*.sh test_all.sh || echo "ShellCheck completed with warnings (non-fatal)"
 
     - name: Run Python tests
       run: |

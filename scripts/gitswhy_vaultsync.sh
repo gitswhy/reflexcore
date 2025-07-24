@@ -221,7 +221,8 @@ retrieve_from_vault() {
 # Create backup of vault
 backup_vault() {
     if [[ -f "$LOG_DIR/vault.json" ]]; then
-        local backup_file="$LOG_DIR/vault_backup_$(date +%Y%m%d_%H%M%S).json"
+        local backup_file
+        backup_file="$LOG_DIR/vault_backup_$(date +%Y%m%d_%H%M%S).json"
         if cp "$LOG_DIR/vault.json" "$backup_file"; then
             log_action "INFO" "Vault backed up to: $backup_file"
             find "$LOG_DIR" -name "vault_backup_*.json" -type f | sort | head -n -5 | xargs rm -f 2>/dev/null || true
@@ -271,7 +272,7 @@ main() {
             backup_vault
             local temp_events
             temp_events=$(mktemp)
-            trap "rm -f $temp_events" EXIT
+            trap 'rm -f "$temp_events"' EXIT
             aggregate_events "$temp_events" "$MAX_EVENTS"
             sync_to_vault "$temp_events" "store"
             log_action "VAULT" "Vault synchronization completed"
