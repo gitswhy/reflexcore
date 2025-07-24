@@ -21,10 +21,16 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        pip install click cryptography
+        pip install -r requirements.txt
+
+    - name: Make scripts executable
+      run: |
+        chmod +x test_all.sh
+        chmod +x scripts/*.sh
+        chmod +x modules/*.sh
 
     - name: Run ReflexCore Test Suite
+      env:
+        CI: true
       run: |
-        chmod +x scripts/gitswhy_initiate.sh scripts/gitswhy_gpuoverclock.sh scripts/gitswhy_quantumflush.sh scripts/gitswhy_autoclean.sh scripts/gitswhy_vaultsync.sh modules/gitswhy_coremirror.sh
-        chmod +x gitswhy_vault_manager.py
         ./test_all.sh 
