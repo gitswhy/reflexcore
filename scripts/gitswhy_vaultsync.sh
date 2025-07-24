@@ -126,7 +126,7 @@ aggregate_events() {
         if echo "$line" | grep -q '^{.*}$'; then
             echo "  $line," >> "$events_file"
         else
-            # Convert plain text log to JSON
+            # Try to extract timestamp, level, message
             local timestamp
             timestamp=$(echo "$line" | grep -o '\[.*\]' | head -1 | tr -d '[]')
             local level
@@ -134,7 +134,14 @@ aggregate_events() {
             local message
             message=$(echo "$line" | sed 's/\[.*\]\[.*\]\[.*\]//' | sed 's/^[[:space:]]*//')
             message=$(echo "$message" | sed 's/"/\\"/g' | sed 's/\\/\\\\/g')
-            echo "  {\"timestamp\": \"$timestamp\", \"level\": \"$level\", \"message\": \"$message\"}," >> "$events_file"
+            # Fallbacks for missing fields
+            [[ -z "$timestamp" ]] && timestamp="unknown"
+            [[ -z "$level" ]] && level="INFO"
+            [[ -z "$message" ]] && message="$line"
+            # Only output if message is not empty
+            if [[ -n "$message" ]]; then
+                echo "  {\"timestamp\": \"$timestamp\", \"level\": \"$level\", \"message\": \"$message\"}," >> "$events_file"
+            fi
         fi
     done
     sed -i '$ s/,$//' "$events_file"
