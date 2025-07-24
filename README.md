@@ -6,6 +6,7 @@
 [![Apache License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/gitswhy/reflexcore/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/gitswhy/reflexcore)](https://github.com/gitswhy/reflexcore/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/gitswhy/reflexcore)](https://github.com/gitswhy/reflexcore/pulls)
+[![CI Status](https://github.com/gitswhy/reflexcore/actions/workflows/reflexcore-ci.yml/badge.svg)](https://github.com/gitswhy/reflexcore/actions/workflows/reflexcore-ci.yml)
 
 **Join our community on [Discord](https://discord.com/invite/NuevNNzQwm)!**
 
@@ -65,8 +66,6 @@ Questions? Join our [Discord](https://discord.com/invite/NuevNNzQwm) or open an 
 - Python feature tests: `python3 testall.py`
 - Full system tests: `sudo ./test_all.sh`
 - All tests should pass before public launch.
-
-![Test Status](https://github.com/gitswhy/reflexcore/actions/workflows/reflexcore-ci.yml/badge.svg)
 
 ## Version Info
 - All major scripts and CLI now support --version for quick version checks. 
