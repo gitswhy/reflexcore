@@ -11,6 +11,7 @@ if [ "$EUID" -eq 0 ]; then
 else
   EVENTS_LOG="$HOME/.gitswhy/events.log"
 fi
+mkdir -p "$(dirname "$EVENTS_LOG")"
 OVERCLOCK_LOG="/root/.gitswhy/overclock.log"
 VAULT_FILE="$LOG_DIR/vault.json"
 

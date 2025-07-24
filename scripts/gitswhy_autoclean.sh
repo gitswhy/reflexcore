@@ -24,6 +24,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 CONFIG_FILE="$ROOT_DIR/config/gitswhy_config.yaml"
 LOG_DIR="$HOME/.gitswhy"
 LOG_FILE="$LOG_DIR/events.log"
+mkdir -p "$(dirname "$LOG_FILE")"
 
 # Color codes for output
 RED='\033[0;31m'
