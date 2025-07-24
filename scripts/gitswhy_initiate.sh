@@ -59,8 +59,10 @@ esac
 log_event() {
     local level="$1"
     local message="$2"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local user=$(whoami 2>/dev/null || echo "unknown")
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local user
+    user=$(whoami 2>/dev/null || echo "unknown")
     local proc_name=${BASH_SOURCE[1]:-main}
 
     # Log rotation by size (default 100MB)
@@ -75,7 +77,8 @@ log_event() {
         esac
     fi
     if [[ -f "$LOG_FILE" ]]; then
-        local log_size=$(wc -c < "$LOG_FILE")
+        local log_size
+        log_size=$(wc -c < "$LOG_FILE")
         if (( log_size > max_size_bytes )); then
             mv "$LOG_FILE" "$LOG_FILE.$(date +%Y%m%d_%H%M%S)"
             touch "$LOG_FILE"

@@ -50,7 +50,8 @@ DEFAULT_TEMP_CLEAN_ENABLED=true
 log_action() {
     local level="$1"
     local message="$2"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     # Ensure log directory exists
     mkdir -p "$LOG_DIR"
@@ -134,12 +135,14 @@ show_system_status() {
     log_action "INFO" "System status before auto-clean:"
     
     # Check for zombie processes
-    local zombie_count=$(ps aux | awk '$8 ~ /^Z/ { count++ } END { print count+0 }')
+    local zombie_count
+    zombie_count=$(ps aux | awk '$8 ~ /^Z/ { count++ } END { print count+0 }')
     log_action "DEBUG" "Zombie processes found: $zombie_count"
     
     # Check memory usage
     if command_exists free; then
-        local mem_usage=$(free | grep Mem | awk '{printf "%.1f", ($3/$2)*100}')
+        local mem_usage
+        mem_usage=$(free | grep Mem | awk '{printf "%.1f", ($3/$2)*100}')
         log_action "DEBUG" "Memory usage: ${mem_usage}%"
     fi
     
@@ -151,7 +154,8 @@ show_system_status() {
     fi
     
     # Check temp directory size
-    local temp_size=$(du -sm /tmp 2>/dev/null | cut -f1 || echo "0")
+    local temp_size
+    temp_size=$(du -sm /tmp 2>/dev/null | cut -f1 || echo "0")
     log_action "DEBUG" "Temp directory size: ${temp_size}MB"
 }
 
@@ -210,7 +214,8 @@ kill_zombie_processes() {
     
     # Verify zombies were cleaned up
     sleep 2
-    local remaining_zombies=$(ps aux | awk '$8 ~ /^Z/ { count++ } END { print count+0 }')
+    local remaining_zombies
+    remaining_zombies=$(ps aux | awk '$8 ~ /^Z/ { count++ } END { print count+0 }')
     if [[ $remaining_zombies -eq 0 ]]; then
         log_action "INFO" "✓ All zombie processes successfully cleaned"
     else
@@ -251,17 +256,21 @@ clear_old_caches() {
         log_action "DEBUG" "Cleaning cache directory: $cache_dir"
         
         # Find and remove old files
-        local old_files=$(find "$cache_dir" -type f -mtime +$CACHE_AGE_DAYS 2>/dev/null | wc -l)
+        local old_files
+        old_files=$(find "$cache_dir" -type f -mtime +$CACHE_AGE_DAYS 2>/dev/null | wc -l)
         old_files=${old_files:-0}
         if [[ $old_files -gt 0 ]]; then
-            local dir_size_before=$(du -sm "$cache_dir" 2>/dev/null | cut -f1 || echo "0")
+            local dir_size_before
+            dir_size_before=$(du -sm "$cache_dir" 2>/dev/null | cut -f1 || echo "0")
             dir_size_before=${dir_size_before:-0}
             
             # Remove old files with permission error handling
             if find "$cache_dir" -type f -mtime +$CACHE_AGE_DAYS -delete 2>/dev/null; then
-                local dir_size_after=$(du -sm "$cache_dir" 2>/dev/null | cut -f1 || echo "0")
+                local dir_size_after
+                dir_size_after=$(du -sm "$cache_dir" 2>/dev/null | cut -f1 || echo "0")
                 dir_size_after=${dir_size_after:-0}
-                local size_freed=$((dir_size_before - dir_size_after))
+                local size_freed
+                size_freed=$((dir_size_before - dir_size_after))
                 
                 cleaned_count=$((cleaned_count + old_files))
                 cleaned_size=$((cleaned_size + size_freed))
@@ -278,6 +287,7 @@ clear_old_caches() {
     
     # Clear system caches if permissions allow
     cleaned_size=${cleaned_size:-0}
+    local mem_percent
     mem_percent=$(free | grep Mem | awk '{printf "%0.f", ($3/$2)*100}' || echo "0")
     mem_percent=${mem_percent:-0}
     MEMORY_THRESHOLD=${MEMORY_THRESHOLD:-80}
@@ -318,8 +328,10 @@ free_system_resources() {
     
     # Check current memory usage
     if command_exists free; then
-        local mem_before=$(free -m | grep Mem | awk '{print $3}')
-        local mem_total=$(free -m | grep Mem | awk '{print $2}')
+        local mem_before
+        mem_before=$(free -m | grep Mem | awk '{print $3}')
+        local mem_total
+        mem_total=$(free -m | grep Mem | awk '{print $2}')
         mem_before=${mem_before:-0}
         mem_total=${mem_total:-1}
         local mem_percent_before=$(( (mem_before * 100) / mem_total ))
@@ -343,8 +355,10 @@ free_system_resources() {
             fi
             
             # Clear swap if it's being used heavily
-            local swap_used=$(free -m | grep Swap | awk '{print $3}')
-            local swap_total=$(free -m | grep Swap | awk '{print $2}')
+            local swap_used
+            swap_used=$(free -m | grep Swap | awk '{print $3}')
+            local swap_total
+            swap_total=$(free -m | grep Swap | awk '{print $2}')
             
             if [[ $swap_total -gt 0 && $swap_used -gt 100 ]]; then
                 log_action "INFO" "Clearing swap space..."
@@ -358,10 +372,12 @@ free_system_resources() {
         
         # Check memory after cleanup
         sleep 2
-        local mem_after=$(free -m | grep Mem | awk '{print $3}')
+        local mem_after
+        mem_after=$(free -m | grep Mem | awk '{print $3}')
         mem_after=${mem_after:-0}
         local mem_percent_after=$(( (mem_after * 100) / mem_total ))
-        local mem_freed=$((mem_before - mem_after))
+        local mem_freed
+        mem_freed=$((mem_before - mem_after))
         
         log_action "INFO" "Memory usage after cleanup: ${mem_percent_after}% (freed ${mem_freed}MB)"
     fi
@@ -402,7 +418,8 @@ clean_temp_files() {
         fi
         
         # Clean old temporary files (older than 1 day)
-        local old_temp_files=$(find "$temp_dir" -type f -mtime +1 2>/dev/null | wc -l)
+        local old_temp_files
+        old_temp_files=$(find "$temp_dir" -type f -mtime +1 2>/dev/null | wc -l)
         if [[ $old_temp_files -gt 0 ]]; then
             if find "$temp_dir" -type f -mtime +1 -delete 2>/dev/null; then
                 cleaned_files=$((cleaned_files + old_temp_files))
@@ -435,7 +452,8 @@ verify_cleaning_success() {
     local verification_passed=true
     
     # Check zombie processes
-    local zombies_after=$(ps aux | awk '$8 ~ /^Z/ { count++ } END { print count+0 }')
+    local zombies_after
+    zombies_after=$(ps aux | awk '$8 ~ /^Z/ { count++ } END { print count+0 }')
     if [[ $zombies_after -eq 0 ]]; then
         log_action "INFO" "✓ No zombie processes remaining"
     else
@@ -444,7 +462,8 @@ verify_cleaning_success() {
     
     # Check memory usage
     if command_exists free; then
-        local mem_usage=$(free | grep Mem | awk '{printf "%.0f", ($3/$2)*100}')
+        local mem_usage
+        mem_usage=$(free | grep Mem | awk '{printf "%.0f", ($3/$2)*100}')
         mem_usage=${mem_usage:-0}
         MEMORY_THRESHOLD=${MEMORY_THRESHOLD:-80}
         if [[ "$mem_usage" =~ ^[0-9]+$ && "$MEMORY_THRESHOLD" =~ ^[0-9]+$ && $mem_usage -lt $MEMORY_THRESHOLD ]]; then
@@ -454,7 +473,8 @@ verify_cleaning_success() {
     fi
     
     # Check disk space
-    local disk_usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+    local disk_usage
+    disk_usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
     log_action "DEBUG" "Root partition usage: ${disk_usage}%"
     
     if [[ "$verification_passed" == "true" ]]; then

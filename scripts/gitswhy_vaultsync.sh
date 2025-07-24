@@ -50,7 +50,8 @@ DEFAULT_COMPRESSION_ENABLED=true
 log_action() {
     local level="$1"
     local message="$2"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     mkdir -p "$LOG_DIR"
     echo "[$timestamp] [VAULT] [$level] $message" >> "$LOG_FILE"
     case "$level" in
@@ -125,25 +126,32 @@ aggregate_events() {
             echo "  $line," >> "$events_file"
         else
             # Convert plain text log to JSON
-            local timestamp=$(echo "$line" | grep -o '\[.*\]' | head -1 | tr -d '[]')
-            local level=$(echo "$line" | grep -o '\[.*\]' | sed -n '2p' | tr -d '[]')
-            local message=$(echo "$line" | sed 's/\[.*\]\[.*\]\[.*\]//' | sed 's/^[[:space:]]*//')
+            local timestamp
+            timestamp=$(echo "$line" | grep -o '\[.*\]' | head -1 | tr -d '[]')
+            local level
+            level=$(echo "$line" | grep -o '\[.*\]' | sed -n '2p' | tr -d '[]')
+            local message
+            message=$(echo "$line" | sed 's/\[.*\]\[.*\]\[.*\]//' | sed 's/^[[:space:]]*//')
             message=$(echo "$message" | sed 's/"/\\"/g' | sed 's/\\/\\\\/g')
             echo "  {\"timestamp\": \"$timestamp\", \"level\": \"$level\", \"message\": \"$message\"}," >> "$events_file"
         fi
     done
     sed -i '$ s/,$//' "$events_file"
     echo "]" >> "$events_file"
-    local event_count=$(grep -c '"timestamp"' "$events_file" 2>/dev/null || echo "0")
+    local event_count
+    event_count=$(grep -c '"timestamp"' "$events_file" 2>/dev/null || echo "0")
     log_action "INFO" "Aggregated $event_count events"
 }
 
 # Get vault statistics
 get_vault_stats() {
     if [[ -f "$LOG_DIR/vault.json" ]]; then
-        local vault_size=$(du -h "$LOG_DIR/vault.json" 2>/dev/null | cut -f1 || echo "0")
-        local vault_modified=$(stat -c %Y "$LOG_DIR/vault.json" 2>/dev/null || echo "0")
-        local vault_age=$(($(date +%s) - vault_modified))
+        local vault_size
+        vault_size=$(du -h "$LOG_DIR/vault.json" 2>/dev/null | cut -f1 || echo "0")
+        local vault_modified
+        vault_modified=$(stat -c %Y "$LOG_DIR/vault.json" 2>/dev/null || echo "0")
+        local vault_age
+        vault_age=$(($(date +%s) - vault_modified))
         log_action "DEBUG" "Vault size: $vault_size, Age: ${vault_age}s"
         echo "vault_size:$vault_size,vault_age:${vault_age}s"
     else
@@ -211,13 +219,15 @@ show_vault_status() {
     echo ""
     if [[ -f "$LOG_DIR/vault.json" ]]; then
         echo -e "${GREEN}[INFO]${NC} Vault exists: $LOG_DIR/vault.json"
-        local stats=$(get_vault_stats)
+        local stats
+        stats=$(get_vault_stats)
         echo -e "${GREEN}[INFO]${NC} Vault statistics: $stats"
     else
         echo -e "${YELLOW}[WARN]${NC} No vault found - will be created on first sync"
     fi
     if [[ -f "$LOG_FILE" ]]; then
-        local log_lines=$(wc -l "$LOG_FILE" || echo "0")
+        local log_lines
+        log_lines=$(wc -l "$LOG_FILE" || echo "0")
         echo -e "${GREEN}[INFO]${NC} Events log: $log_lines lines"
     else
         echo -e "${YELLOW}[WARN]${NC} No events log found"
@@ -238,7 +248,8 @@ main() {
         "sync")
             show_vault_status
             backup_vault
-            local temp_events=$(mktemp)
+            local temp_events
+            temp_events=$(mktemp)
             trap "rm -f $temp_events" EXIT
             aggregate_events "$temp_events" "$MAX_EVENTS"
             sync_to_vault "$temp_events" "store"

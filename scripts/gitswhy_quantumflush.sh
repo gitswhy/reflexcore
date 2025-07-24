@@ -48,7 +48,8 @@ DEFAULT_ENTROPY_REFRESH=true
 log_action() {
     local level="$1"
     local message="$2"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     # Ensure log directory exists
     mkdir -p "$LOG_DIR"

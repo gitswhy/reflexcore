@@ -46,7 +46,8 @@ DEFAULT_ULIMIT_U=32768
 log_action() {
     local level="$1"
     local message="$2"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     # Ensure log directory exists
     mkdir -p "$LOG_DIR"
@@ -223,8 +224,10 @@ optimize_shell_limits() {
     log_action "INFO" "Optimizing shell resource limits..."
     
     # Get current limits for logging
-    local current_nofile=$(ulimit -n)
-    local current_nproc=$(ulimit -u)
+    local current_nofile
+    current_nofile=$(ulimit -n)
+    local current_nproc
+    current_nproc=$(ulimit -u)
     
     log_action "DEBUG" "Current limits - nofile: $current_nofile, nproc: $current_nproc"
     
@@ -287,7 +290,8 @@ verify_optimizations() {
     
     # Check swappiness
     if [[ -f "/proc/sys/vm/swappiness" ]]; then
-        local current_swappiness=$(cat /proc/sys/vm/swappiness)
+        local current_swappiness
+        current_swappiness=$(cat /proc/sys/vm/swappiness)
         if [[ "$current_swappiness" == "$SWAPPINESS" ]]; then
             log_action "INFO" "✓ vm.swappiness verified: $current_swappiness"
         else
@@ -298,7 +302,8 @@ verify_optimizations() {
     
     # Check vfs_cache_pressure
     if [[ -f "/proc/sys/vm/vfs_cache_pressure" ]]; then
-        local current_vfs=$(cat /proc/sys/vm/vfs_cache_pressure)
+        local current_vfs
+        current_vfs=$(cat /proc/sys/vm/vfs_cache_pressure)
         if [[ "$current_vfs" == "$VFS_CACHE_PRESSURE" ]]; then
             log_action "INFO" "✓ vm.vfs_cache_pressure verified: $current_vfs"
         else
@@ -308,7 +313,8 @@ verify_optimizations() {
     fi
     
     # Check ulimits
-    local current_nofile=$(ulimit -n)
+    local current_nofile
+    current_nofile=$(ulimit -n)
     if [[ "$current_nofile" == "$ULIMIT_N" ]]; then
         log_action "INFO" "✓ ulimit -n verified: $current_nofile"
     else
