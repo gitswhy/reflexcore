@@ -9,10 +9,9 @@ from cryptography.hazmat.backends import default_backend
 password = "gitswhy_default_vault_password_2025"
 iterations = 100000
 
-@pytest.mark.parametrize("vault_path", [os.path.expanduser("~/.gitswhy/vault.json")])
-def test_decrypt_vault(vault_path):
+def try_decrypt_vault(vault_path):
     if not os.path.exists(vault_path):
-        pytest.skip(f"Vault file not found: {vault_path}")
+        return None, f"Vault file not found: {vault_path}"
     with open(vault_path, "r") as f:
         enc = f.read().strip()
     try:
@@ -28,7 +27,17 @@ def test_decrypt_vault(vault_path):
         key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
         fernet = Fernet(key)
         dec = fernet.decrypt(token.encode()).decode()
-        print("Decryption successful! Vault contents:")
-        print(dec)
+        return dec, None
     except Exception as e:
-        pytest.fail(f"Decryption failed: {e}") 
+        return None, f"Decryption failed: {e}"
+
+def test_decrypt_vault():
+    vault_path = os.path.expanduser("~/.gitswhy/vault.json")
+    dec, err = try_decrypt_vault(vault_path)
+    if err and "Vault file not found" in err:
+        pytest.skip(err)
+    elif err:
+        pytest.fail(err)
+    else:
+        print("Decryption successful! Vault contents:")
+        print(dec) 
