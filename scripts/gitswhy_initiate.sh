@@ -183,9 +183,11 @@ check_system_requirements() {
 # Check privileges
 check_privileges() {
     if [[ $EUID -ne 0 ]]; then
+        # shellcheck disable=SC2034  # SUDO_PREFIX is reserved for future use
         SUDO_PREFIX=""
         log_event "WARN" "Not running as root. Privileged operations will be skipped."
     else
+        # shellcheck disable=SC2034  # SUDO_PREFIX is reserved for future use
         SUDO_PREFIX=""
     fi
 }
@@ -299,6 +301,7 @@ start_auto_clean() {
 }
 
 # Start core monitoring process
+# shellcheck disable=SC2120,SC2119  # Function does not use arguments and is always called without them
 start_core_monitoring() {
     if [[ "$CORE_MONITOR_ENABLED" != "true" ]]; then
         log_event "INFO" "Core monitoring disabled in configuration"
