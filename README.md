@@ -3,6 +3,7 @@
 ![ReflexCore Logo](assets/logo.png)
 
 [![GitHub stars](https://img.shields.io/github/stars/gitswhy/reflexcore?style=social)](https://github.com/gitswhy/reflexcore/stargazers)
+[![Version](https://img.shields.io/badge/version-v1.0.0-green.svg)](https://github.com/gitswhy/reflexcore/releases/tag/v1.0.0)
 [![Apache License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/gitswhy/reflexcore/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/gitswhy/reflexcore)](https://github.com/gitswhy/reflexcore/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/gitswhy/reflexcore)](https://github.com/gitswhy/reflexcore/pulls)
