@@ -174,9 +174,9 @@ kill_zombie_processes() {
     
     # Find zombie processes and their parent PIDs
     local zombie_pids
-    zombie_pids=($(ps -eo pid,ppid,stat,cmd | awk '$3=="Z" {print $1}' 2>/dev/null || true))
+    mapfile -t zombie_pids < <(ps -eo pid,ppid,stat,cmd | awk '$3=="Z" {print $1}' 2>/dev/null || true)
     local parent_pids
-    parent_pids=($(ps -eo pid,ppid,stat,cmd | awk '$3=="Z" {print $2}' 2>/dev/null || true))
+    mapfile -t parent_pids < <(ps -eo pid,ppid,stat,cmd | awk '$3=="Z" {print $2}' 2>/dev/null || true)
     
     if [[ ${#zombie_pids[@]} -eq 0 ]]; then
         log_action "INFO" "✓ No zombie processes found"
