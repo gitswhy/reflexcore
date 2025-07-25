@@ -35,8 +35,15 @@ def test_data_file():
 
 @pytest.fixture(scope="session")
 def vault_file():
-    """Get vault file path"""
-    return os.path.expanduser("~/.gitswhy/vault.json")
+    """Get vault file path and ensure directory exists"""
+    vault_dir = os.path.expanduser("~/.gitswhy")
+    vault_file_path = os.path.join(vault_dir, "vault.json")
+    
+    # Ensure vault directory exists
+    os.makedirs(vault_dir, exist_ok=True)
+    print(f"✓ Created vault directory: {vault_dir}")
+    
+    return vault_file_path
 
 @pytest.fixture(scope="session")
 def config_file():
