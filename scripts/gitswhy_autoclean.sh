@@ -259,7 +259,7 @@ clear_old_caches() {
         
         # Find and remove old files
         local old_files
-        old_files=$(find "$cache_dir" -type f -mtime +$CACHE_AGE_DAYS 2>/dev/null | wc -l)
+        old_files=$(find "$cache_dir" -type f -mtime "+$CACHE_AGE_DAYS" 2>/dev/null | wc -l)
         old_files=${old_files:-0}
         if [[ $old_files -gt 0 ]]; then
             local dir_size_before
@@ -267,7 +267,7 @@ clear_old_caches() {
             dir_size_before=${dir_size_before:-0}
             
             # Remove old files with permission error handling
-            if find "$cache_dir" -type f -mtime +$CACHE_AGE_DAYS -delete 2>/dev/null; then
+            if find "$cache_dir" -type f -mtime "+$CACHE_AGE_DAYS" -delete 2>/dev/null; then
                 local dir_size_after
                 dir_size_after=$(du -sm "$cache_dir" 2>/dev/null | cut -f1 || echo "0")
                 dir_size_after=${dir_size_after:-0}
