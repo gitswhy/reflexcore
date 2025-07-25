@@ -90,7 +90,7 @@ log_event() {
     if [[ -n "${LOG_ROTATION_DAYS:-}" ]]; then
         rotation_days=$LOG_ROTATION_DAYS
     fi
-    find "$(dirname "$LOG_FILE")" -name "$(basename "$LOG_FILE").*" -mtime +$rotation_days -delete 2>/dev/null || true
+    find "$(dirname "$LOG_FILE")" -name "$(basename "$LOG_FILE").*" -mtime "+$rotation_days" -delete 2>/dev/null || true
 
     # Write log entry with context
     echo "[$timestamp] [$level] [user:$user] [proc:$proc_name] $message" >> "$LOG_FILE"
