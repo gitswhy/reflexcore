@@ -207,27 +207,25 @@ start_overclocking() {
     log_event "INFO" "Starting overclocking process..."
     
     # Create overclocking background process
-    nohup bash -c '
+    nohup bash -c "
         while true; do
             # Check CPU temperature and adjust frequencies
             for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
-                if [[ -f "$cpu/cpufreq/scaling_governor" ]]; then
-                    echo "performance" > "$cpu/cpufreq/scaling_governor" 2>/dev/null || true
+                if [[ -f \"\$cpu/cpufreq/scaling_governor\" ]]; then
+                    echo performance > \"\$cpu/cpufreq/scaling_governor\" 2>/dev/null || true
                 fi
             done
-            
             # Log temperature monitoring
             if [[ -f /sys/class/thermal/thermal_zone0/temp ]]; then
-                temp=$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo "0")
-                temp_c=$((temp / 1000))
-                if [[ $temp_c -gt 80 ]]; then
-                    echo "$(date): High CPU temp: ${temp_c}°C" >> '"$LOG_FILE"'
+                temp=\$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo 0)
+                temp_c=\$((temp / 1000))
+                if [[ \$temp_c -gt 80 ]]; then
+                    echo \"\$(date): High CPU temp: \${temp_c}°C\" >> \"$LOG_FILE\"
                 fi
             fi
-            
             sleep 30
         done
-    ' > "$LOG_DIR/overclocking.out" 2>&1 &
+    " > "$LOG_DIR/overclocking.out" 2>&1 &
     
     echo $! > "$PID_DIR/overclocking.pid"
     log_event "INFO" "Overclocking process started with PID: $!"
@@ -245,25 +243,23 @@ start_entropy_flush() {
     fi
     log_event "INFO" "Starting entropy flush process..."
     
-    nohup bash -c '
+    nohup bash -c "
         while true; do
             # Flush entropy pool periodically
             if [[ -w /proc/sys/kernel/random/entropy_avail ]]; then
-                entropy=$(cat /proc/sys/kernel/random/entropy_avail 2>/dev/null || echo "0")
-                if [[ $entropy -lt 1000 ]]; then
+                entropy=\$(cat /proc/sys/kernel/random/entropy_avail 2>/dev/null || echo 0)
+                if [[ \$entropy -lt 1000 ]]; then
                     # Generate entropy using system activity
-                    find /proc -type f -name "stat" -exec cat {} \; >/dev/null 2>&1 &
+                    find /proc -type f -name 'stat' -exec cat {} \\; >/dev/null 2>&1 &
                     dd if=/dev/urandom of=/dev/null bs=1 count=100 2>/dev/null &
                 fi
             fi
-            
             # Clear system caches periodically
             sync
             echo 1 > /proc/sys/vm/drop_caches 2>/dev/null || true
-            
-            sleep '"$ENTROPY_INTERVAL"'
+            sleep \"$ENTROPY_INTERVAL\"
         done
-    ' > "$LOG_DIR/entropy_flush.out" 2>&1 &
+    " > "$LOG_DIR/entropy_flush.out" 2>&1 &
     
     echo $! > "$PID_DIR/entropy_flush.pid"
     log_event "INFO" "Entropy flush process started with PID: $!"
@@ -281,26 +277,22 @@ start_auto_clean() {
     fi
     log_event "INFO" "Starting auto-clean process..."
     
-    nohup bash -c '
+    nohup bash -c "
         while true; do
             # Clean temporary files
-            find /tmp -type f -name ".*" -mtime +1 -delete 2>/dev/null || true
-            find /tmp -type f -name "core.*" -delete 2>/dev/null || true
-            
+            find /tmp -type f -name '.*' -mtime +1 -delete 2>/dev/null || true
+            find /tmp -type f -name 'core.*' -delete 2>/dev/null || true
             # Clean user cache
-            if [[ -d "$HOME/.cache" ]]; then
-                find "$HOME/.cache" -type f -mtime +7 -delete 2>/dev/null || true
+            if [[ -d \"$HOME/.cache\" ]]; then
+                find \"$HOME/.cache\" -type f -mtime +7 -delete 2>/dev/null || true
             fi
-            
             # Clean log files older than 30 days
-            find '"$LOG_DIR"' -name "*.log.*" -mtime +30 -delete 2>/dev/null || true
-            
+            find \"$LOG_DIR\" -name '*.log.*' -mtime +30 -delete 2>/dev/null || true
             # Report cleaning activity
-            echo "$(date): Auto-clean cycle completed" >> '"$LOG_FILE"'
-            
-            sleep '"$CLEAN_INTERVAL"'
+            echo \"\$(date): Auto-clean cycle completed\" >> \"$LOG_FILE\"
+            sleep \"$CLEAN_INTERVAL\"
         done
-    ' > "$LOG_DIR/auto_clean.out" 2>&1 &
+    " > "$LOG_DIR/auto_clean.out" 2>&1 &
     
     echo $! > "$PID_DIR/auto_clean.pid"
     log_event "INFO" "Auto-clean process started with PID: $!"
@@ -318,35 +310,29 @@ start_core_monitoring() {
     fi
     log_event "INFO" "Starting core monitoring process..."
     
-    nohup bash -c '
+    nohup bash -c "
         while true; do
             # Monitor CPU usage
-            cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk "{print \$2}" | sed "s/%us,//")
-            
+            cpu_usage=\$(top -bn1 | grep 'Cpu(s)' | awk '{print \\$2}' | sed 's/%us,//')
             # Monitor memory usage
-            mem_info=$(free | grep Mem)
-            mem_used=$(echo $mem_info | awk "{print \$3}")
-            mem_total=$(echo $mem_info | awk "{print \$2}")
-            mem_percent=$((mem_used * 100 / mem_total))
-            
+            mem_info=\$(free | grep Mem)
+            mem_used=\$(echo \$mem_info | awk '{print \\$3}')
+            mem_total=\$(echo \$mem_info | awk '{print \\$2}')
+            mem_percent=\$((mem_used * 100 / mem_total))
             # Monitor disk usage
-            disk_usage=$(df / | tail -1 | awk "{print \$5}" | sed "s/%//")
-            
+            disk_usage=\$(df / | tail -1 | awk '{print \\$5}' | sed 's/%//')
             # Log metrics
-            echo "$(date): CPU: ${cpu_usage}% MEM: ${mem_percent}% DISK: ${disk_usage}%" >> '"$LOG_FILE"'
-            
+            echo \"\$(date): CPU: \${cpu_usage}% MEM: \${mem_percent}% DISK: \${disk_usage}%\" >> \"$LOG_FILE\"
             # Alert on high usage
-            if [[ ${mem_percent} -gt 90 ]]; then
-                echo "$(date): WARNING - High memory usage: ${mem_percent}%" >> '"$LOG_FILE"'
+            if [[ \${mem_percent} -gt 90 ]]; then
+                echo \"\$(date): WARNING - High memory usage: \${mem_percent}%\" >> \"$LOG_FILE\"
             fi
-            
-            if [[ ${disk_usage} -gt 90 ]]; then
-                echo "$(date): WARNING - High disk usage: ${disk_usage}%" >> '"$LOG_FILE"'
+            if [[ \${disk_usage} -gt 90 ]]; then
+                echo \"\$(date): WARNING - High disk usage: \${disk_usage}%\" >> \"$LOG_FILE\"
             fi
-            
-            sleep '"$MONITOR_INTERVAL"'
+            sleep \"$MONITOR_INTERVAL\"
         done
-    ' > "$LOG_DIR/core_monitoring.out" 2>&1 &
+    " > "$LOG_DIR/core_monitoring.out" 2>&1 &
     
     echo $! > "$PID_DIR/core_monitoring.pid"
     log_event "INFO" "Core monitoring process started with PID: $!"
@@ -364,32 +350,26 @@ start_vault_sync() {
     fi
     log_event "INFO" "Starting vault sync process..."
     
-    nohup bash -c '
-        vault_dir="$HOME/.gitswhy/vault"
-        backup_dir="$HOME/.gitswhy/vault_backup"
-        
+    nohup bash -c "
+        vault_dir=\"$HOME/.gitswhy/vault\"
+        backup_dir=\"$HOME/.gitswhy/vault_backup\"
         # Create vault directories if they dont exist
-        mkdir -p "$vault_dir" "$backup_dir"
-        
+        mkdir -p \"$vault_dir\" \"$backup_dir\"
         while true; do
             # Sync vault data with backup
-            if [[ -d "$vault_dir" ]]; then
-                rsync -a --delete "$vault_dir/" "$backup_dir/" 2>/dev/null || true
-                
+            if [[ -d \"$vault_dir\" ]]; then
+                rsync -a --delete \"$vault_dir/\" \"$backup_dir/\" 2>/dev/null || true
                 # Create timestamped snapshot
-                snapshot_name="vault_$(date +%Y%m%d_%H%M%S)"
-                cp -r "$vault_dir" "$backup_dir/$snapshot_name" 2>/dev/null || true
-                
+                snapshot_name=\"vault_\$(date +%Y%m%d_%H%M%S)\"
+                cp -r \"$vault_dir\" \"$backup_dir/\$snapshot_name\" 2>/dev/null || true
                 # Keep only last 10 snapshots
-                cd "$backup_dir"
+                cd \"$backup_dir\"
                 ls -dt vault_* 2>/dev/null | tail -n +11 | xargs rm -rf 2>/dev/null || true
-                
-                echo "$(date): Vault sync completed" >> '"$LOG_FILE"'
+                echo \"\$(date): Vault sync completed\" >> \"$LOG_FILE\"
             fi
-            
             sleep 1800  # Sync every 30 minutes
         done
-    ' > "$LOG_DIR/vault_sync.out" 2>&1 &
+    " > "$LOG_DIR/vault_sync.out" 2>&1 &
     
     echo $! > "$PID_DIR/vault_sync.pid"
     log_event "INFO" "Vault sync process started with PID: $!"

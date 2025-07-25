@@ -1,6 +1,6 @@
 # ReflexCore: Open-Source Cognitive Shell for Gitswhy OS
 
-![ReflexCore Logo](https://via.placeholder.com/150?text=ReflexCore) 
+![ReflexCore Logo](assets/logo.png)
 
 [![GitHub stars](https://img.shields.io/github/stars/gitswhy/reflexcore?style=social)](https://github.com/gitswhy/reflexcore/stargazers)
 [![Apache License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/gitswhy/reflexcore/blob/main/LICENSE)
