@@ -339,6 +339,7 @@ start_core_monitoring() {
 }
 
 # Start vault sync process
+# shellcheck disable=SC2154  # vault_dir and backup_dir are defined inside the bash -c string
 start_vault_sync() {
     if [[ "$VAULT_SYNC_ENABLED" != "true" ]]; then
         log_event "INFO" "Vault sync disabled in configuration"
@@ -435,6 +436,7 @@ main() {
             # Start all processes
             log_event "INFO" "Initializing ReflexCore background processes..."
             
+            # shellcheck disable=SC2120,SC2119  # start_core_monitoring does not use arguments
             start_overclocking || log_event "ERROR" "Failed to start overclocking"
             start_entropy_flush || log_event "ERROR" "Failed to start entropy flush"
             start_auto_clean || log_event "ERROR" "Failed to start auto-clean"
