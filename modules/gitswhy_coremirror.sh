@@ -214,6 +214,7 @@ read_keystroke() {
         # Try using read with timeout
         if read -t 1 -n 1 char 2>/dev/null; then
             # read succeeded
+            :
         else
             # All methods failed
             echo "TIMEOUT"
