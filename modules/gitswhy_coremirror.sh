@@ -121,11 +121,31 @@ log_json_event() {
 setup_raw_mode() {
     echo -e "${BLUE}[DEBUG]${NC} Setting up raw terminal mode..."
     
-    # Save original terminal settings for restoration
-    ORIGINAL_STTY_SETTINGS=$(stty -g)
+    # Check if we're in an interactive terminal
+    if [[ ! -t 0 ]]; then
+        echo -e "${YELLOW}[WARN]${NC} Not running in interactive terminal. Skipping raw mode setup."
+        return 0
+    fi
     
-    # Configure terminal for raw input
-    stty -echo -icanon -isig min 1 time 0
+    # Check if stty is available
+    if ! command -v stty >/dev/null 2>&1; then
+        echo -e "${YELLOW}[WARN]${NC} stty command not available. Skipping raw mode setup."
+        return 0
+    fi
+    
+    # Save original terminal settings for restoration
+    ORIGINAL_STTY_SETTINGS=$(stty -g 2>/dev/null || echo "")
+    
+    if [[ -z "$ORIGINAL_STTY_SETTINGS" ]]; then
+        echo -e "${YELLOW}[WARN]${NC} Could not save terminal settings. Skipping raw mode setup."
+        return 0
+    fi
+    
+    # Configure terminal for raw input with timeout
+    if ! timeout 5s stty -echo -icanon -isig min 1 time 0 2>/dev/null; then
+        echo -e "${YELLOW}[WARN]${NC} Failed to configure terminal for raw mode. Continuing with default settings."
+        return 0
+    fi
     
     echo -e "${GREEN}[INFO]${NC} Terminal configured for raw keystroke monitoring"
     log_json_event "setup" "Terminal configured for raw mode" "0"
@@ -181,8 +201,25 @@ setup_signal_traps() {
 read_keystroke() {
     local char
     
-    # Read exactly one character using dd for reliable raw input
-    char=$(dd bs=1 count=1 2>/dev/null)
+    # Try to read with timeout first
+    if command -v timeout >/dev/null 2>&1; then
+        char=$(timeout 1s dd bs=1 count=1 2>/dev/null || echo "")
+    else
+        # Fallback: try dd without timeout
+        char=$(dd bs=1 count=1 2>/dev/null || echo "")
+    fi
+    
+    # If dd failed or timed out, try alternative method
+    if [[ -z "$char" ]]; then
+        # Try using read with timeout
+        if read -t 1 -n 1 char 2>/dev/null; then
+            # read succeeded
+        else
+            # All methods failed
+            echo "TIMEOUT"
+            return
+        fi
+    fi
     
     # Handle special characters
     case "$char" in
@@ -332,6 +369,15 @@ check_requirements() {
     
     if ! command -v dd >/dev/null 2>&1; then
         missing_commands+=("dd")
+    fi
+    
+    # Check for optional but recommended commands
+    if ! command -v timeout >/dev/null 2>&1; then
+        echo -e "${YELLOW}[WARN]${NC} timeout command not available. Some features may be limited."
+    fi
+    
+    if ! command -v stty >/dev/null 2>&1; then
+        echo -e "${YELLOW}[WARN]${NC} stty command not available. Raw terminal mode will be disabled."
     fi
     
     if [[ ${#missing_commands[@]} -gt 0 ]]; then
