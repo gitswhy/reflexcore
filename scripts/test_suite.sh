@@ -27,7 +27,8 @@ log_test() {
     local level="$1"
     local message="$2"
     local context="${3:-}"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     # Ensure log directory exists
     mkdir -p "$(dirname "$TEST_LOG_FILE")"
@@ -68,8 +69,10 @@ run_test() {
             rm -f /tmp/test_error_$$
             return 0
         else
-            local exit_code=$?
-            local error_output=$(cat /tmp/test_error_$$ 2>/dev/null || echo "Unknown error")
+            local exit_code
+            exit_code=$?
+            local error_output
+            error_output=$(cat /tmp/test_error_$$ 2>/dev/null || echo "Unknown error")
             rm -f /tmp/test_error_$$
             
             if [[ $attempt -lt $max_retries ]]; then

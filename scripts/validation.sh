@@ -26,7 +26,8 @@ log_validation() {
     local level="$1"
     local message="$2"
     local context="${3:-}"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     # Ensure log directory exists
     mkdir -p "$(dirname "$VALIDATION_LOG_FILE")"

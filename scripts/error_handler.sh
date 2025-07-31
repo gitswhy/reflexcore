@@ -29,7 +29,8 @@ log_error() {
     local level="$1"
     local message="$2"
     local context="${3:-}"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     # Ensure log directory exists
     mkdir -p "$(dirname "$ERROR_LOG_FILE")"
@@ -72,7 +73,8 @@ safe_execute() {
             return 0
         else
             last_error_code=$?
-            local error_output=$(cat /tmp/error_$$ 2>/dev/null || echo "Unknown error")
+            local error_output
+            error_output=$(cat /tmp/error_$$ 2>/dev/null || echo "Unknown error")
             rm -f /tmp/error_$$
             
             log_error "WARN" "Command failed (exit: $last_error_code): $command" "$context"
@@ -82,7 +84,8 @@ safe_execute() {
             LAST_ERROR_CODE=$last_error_code
             
             if [[ $attempt -lt $max_retries ]]; then
-                local delay=$((RETRY_DELAY * attempt))
+                local delay
+                delay=$((RETRY_DELAY * attempt))
                 log_error "INFO" "Retrying in ${delay}s..." "$context"
                 sleep "$delay"
                 ((attempt++))
