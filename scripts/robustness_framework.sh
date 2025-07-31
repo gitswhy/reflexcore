@@ -156,7 +156,7 @@ robust_execute() {
             
             # Handle recovery strategy
             case $recovery_strategy in
-                $RECOVERY_RETRY)
+                "$RECOVERY_RETRY")
                     if [[ $attempt -lt $max_retries ]]; then
                         local delay
                         delay=$((RETRY_DELAY * (BACKOFF_MULTIPLIER ** (attempt - 1))))
@@ -166,15 +166,15 @@ robust_execute() {
                         continue
                     fi
                     ;;
-                $RECOVERY_FALLBACK)
+                "$RECOVERY_FALLBACK")
                     robust_log "INFO" "Attempting fallback strategy..." "$context"
                     return $last_error_code
                     ;;
-                $RECOVERY_SKIP)
+                "$RECOVERY_SKIP")
                     robust_log "WARN" "Skipping failed command" "$context"
                     return 0
                     ;;
-                $RECOVERY_EXIT)
+                "$RECOVERY_EXIT")
                     robust_log "FATAL" "Critical command failed, exiting" "$context"
                     exit $last_error_code
                     ;;
