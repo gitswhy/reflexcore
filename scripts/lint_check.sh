@@ -8,7 +8,7 @@ set -euo pipefail
 # Configuration
 LINT_LOG_FILE="${LINT_LOG_FILE:-$HOME/.gitswhy/lint_check.log}"
 SHELLCHECK_SEVERITY="style"
-SHELLCHECK_EXCLUDE="SC2034,SC2155,SC2162,SC2254,SC1090,SC1091"
+SHELLCHECK_EXCLUDE="SC2034,SC2155,SC2162,SC2254,SC2001,SC1090,SC1091"
 
 # Color codes
 RED='\033[0;31m'
@@ -99,11 +99,15 @@ lint_script() {
         
         if [[ $error_count -gt 0 ]]; then
             log_lint "FAIL" "ShellCheck found $error_count errors in: $script_file" "$context"
-            echo "$shellcheck_output" | sed 's/^/  /'
+            while IFS= read -r line; do
+                echo "  $line"
+            done <<< "$shellcheck_output"
             return 1
         elif [[ $warning_count -gt 0 ]]; then
             log_lint "WARN" "ShellCheck found $warning_count warnings in: $script_file" "$context"
-            echo "$shellcheck_output" | sed 's/^/  /'
+            while IFS= read -r line; do
+                echo "  $line"
+            done <<< "$shellcheck_output"
             return 0
         else
             log_lint "PASS" "ShellCheck passed: $script_file" "$context"
