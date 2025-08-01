@@ -218,14 +218,20 @@ vault:
 
 3. **Test Keystroke Monitoring**
    ```bash
+   # Check script status first
+   modules/gitswhy_coremirror.sh status
+   
    # Run the monitoring script in background
-   modules/gitswhy_coremirror.sh &
+   modules/gitswhy_coremirror.sh monitor &
    
    # Test by typing with pauses (in the same terminal)
    echo "Type something with a pause..." # Pause 2-3 seconds while typing
    
    # Check logs
    cat ~/.gitswhy/events.log
+   
+   # Or use the built-in logs command
+   modules/gitswhy_coremirror.sh logs
    ```
 
 4. **Test Performance Optimization**

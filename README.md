@@ -107,14 +107,20 @@ ReflexCore
 
 3. **Test Keystroke Monitoring**
    ```bash
+   # Check script status first
+   modules/gitswhy_coremirror.sh status
+   
    # Run the monitoring script in background
-   modules/gitswhy_coremirror.sh &
+   modules/gitswhy_coremirror.sh monitor &
    
    # Test by typing with pauses (in the same terminal)
    echo "Type something with a pause..." # Pause 2-3 seconds while typing
    
    # Check logs
    cat ~/.gitswhy/events.log
+   
+   # Or use the built-in logs command
+   modules/gitswhy_coremirror.sh logs
    ```
 
 4. **Test Performance Optimization**
@@ -223,6 +229,45 @@ python3 cli/gitswhy_cli.py stop
 
 # Restart services
 python3 cli/gitswhy_cli.py restart
+```
+
+## 🧠 Core Mirror Script Usage
+
+The `modules/gitswhy_coremirror.sh` script provides advanced keystroke monitoring and hesitation detection:
+
+```bash
+# Check script status and configuration
+modules/gitswhy_coremirror.sh status
+
+# Start keystroke monitoring (default)
+modules/gitswhy_coremirror.sh monitor
+
+# Run test monitoring sequence
+modules/gitswhy_coremirror.sh test
+
+# View recent monitoring events
+modules/gitswhy_coremirror.sh logs
+
+# Run in background
+modules/gitswhy_coremirror.sh monitor &
+```
+
+### **Core Mirror Features**
+- **Real-time Keystroke Monitoring**: Tracks every keystroke with microsecond precision
+- **Hesitation Detection**: Automatically detects typing pauses (configurable threshold)
+- **JSON Logging**: Structured logging to `~/.gitswhy/events.log`
+- **Configuration-Driven**: All settings configurable via `config/gitswhy_config.yaml`
+- **Background Operation**: Can run silently in the background
+- **Cross-Platform**: Works on Linux and macOS systems
+
+### **Configuration Options**
+```yaml
+# In config/gitswhy_config.yaml
+core_mirror:
+  keystroke_monitoring_enabled: true
+  hesitation_threshold: 2.0  # seconds
+  hesitation_alerts_enabled: true
+  json_logging_enabled: true
 ```
 
 ## 🚨 Quick Troubleshooting
