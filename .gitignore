@@ -25,6 +25,16 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+myenv/
+.venv/
+.env/
+
 # Bash/Shell and script artifacts
 *.log
 *.bak

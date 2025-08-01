@@ -326,7 +326,7 @@ reset_ui_sludge() {
     fi
     
     # Clear GNOME Shell cache and restart (if running)
-    if [[ "$XDG_CURRENT_DESKTOP" == *"GNOME"* ]] && command_exists gnome-shell; then
+    if [[ "${XDG_CURRENT_DESKTOP:-}" == *"GNOME"* ]] && command_exists gnome-shell; then
         log_action "INFO" "Clearing GNOME Shell cache..."
         rm -rf ~/.cache/gnome-shell/ 2>/dev/null || true
         
@@ -341,7 +341,7 @@ reset_ui_sludge() {
     fi
     
     # Clear KDE Plasma cache
-    if [[ "$XDG_CURRENT_DESKTOP" == *"KDE"* ]]; then
+    if [[ "${XDG_CURRENT_DESKTOP:-}" == *"KDE"* ]]; then
         log_action "INFO" "Clearing KDE Plasma cache..."
         rm -rf ~/.cache/kioexec/ 2>/dev/null || true
         rm -rf ~/.cache/plasma* 2>/dev/null || true

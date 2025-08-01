@@ -57,8 +57,8 @@ esac
 
 # Enhanced log function with log rotation
 log_event() {
-    local level="$1"
-    local message="$2"
+    local level="${1:-INFO}"
+    local message="${2:-No message provided}"
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local user
@@ -314,26 +314,30 @@ start_core_monitoring() {
     log_event "INFO" "Starting core monitoring process..."
     
     nohup bash -c "
+        # Initialize variables with defaults
+        monitor_interval=\"\${MONITOR_INTERVAL:-60}\"
+        log_file=\"$LOG_FILE\"
+        
         while true; do
             # Monitor CPU usage
-            cpu_usage=\$(top -bn1 | grep 'Cpu(s)' | awk '{print \\$2}' | sed 's/%us,//')
+            cpu_usage=\$(top -bn1 | grep 'Cpu(s)' | awk '{print \\$2}' | sed 's/%us,//' 2>/dev/null || echo '0')
             # Monitor memory usage
-            mem_info=\$(free | grep Mem)
-            mem_used=\$(echo \$mem_info | awk '{print \\$3}')
-            mem_total=\$(echo \$mem_info | awk '{print \\$2}')
+            mem_info=\$(free | grep Mem 2>/dev/null || echo '0 0 0')
+            mem_used=\$(echo \$mem_info | awk '{print \\$3}' 2>/dev/null || echo '0')
+            mem_total=\$(echo \$mem_info | awk '{print \\$2}' 2>/dev/null || echo '1')
             mem_percent=\$((mem_used * 100 / mem_total))
             # Monitor disk usage
-            disk_usage=\$(df / | tail -1 | awk '{print \\$5}' | sed 's/%//')
+            disk_usage=\$(df / | tail -1 | awk '{print \\$5}' | sed 's/%//' 2>/dev/null || echo '0')
             # Log metrics
-            echo \"\$(date): CPU: \${cpu_usage}% MEM: \${mem_percent}% DISK: \${disk_usage}%\" >> \"$LOG_FILE\"
+            echo \"\$(date): CPU: \${cpu_usage}% MEM: \${mem_percent}% DISK: \${disk_usage}%\" >> \"\$log_file\"
             # Alert on high usage
             if [[ \${mem_percent} -gt 90 ]]; then
-                echo \"\$(date): WARNING - High memory usage: \${mem_percent}%\" >> \"$LOG_FILE\"
+                echo \"\$(date): WARNING - High memory usage: \${mem_percent}%\" >> \"\$log_file\"
             fi
             if [[ \${disk_usage} -gt 90 ]]; then
-                echo \"\$(date): WARNING - High disk usage: \${disk_usage}%\" >> \"$LOG_FILE\"
+                echo \"\$(date): WARNING - High disk usage: \${disk_usage}%\" >> \"\$log_file\"
             fi
-            sleep \"$MONITOR_INTERVAL\"
+            sleep \"\$monitor_interval\"
         done
     " > "$LOG_DIR/core_monitoring.out" 2>&1 &
     
@@ -355,21 +359,24 @@ start_vault_sync() {
     log_event "INFO" "Starting vault sync process..."
     
     nohup bash -c "
-        vault_dir=\"$HOME/.gitswhy/vault\"
-        backup_dir=\"$HOME/.gitswhy/vault_backup\"
+        # Initialize variables with defaults
+        vault_dir=\"\$HOME/.gitswhy/vault\"
+        backup_dir=\"\$HOME/.gitswhy/vault_backup\"
+        log_file=\"$LOG_FILE\"
+        
         # Create vault directories if they dont exist
-        mkdir -p \"$vault_dir\" \"$backup_dir\"
+        mkdir -p \"\$vault_dir\" \"\$backup_dir\" 2>/dev/null || true
         while true; do
             # Sync vault data with backup
-            if [[ -d \"$vault_dir\" ]]; then
-                rsync -a --delete \"$vault_dir/\" \"$backup_dir/\" 2>/dev/null || true
+            if [[ -d \"\$vault_dir\" ]]; then
+                rsync -a --delete \"\$vault_dir/\" \"\$backup_dir/\" 2>/dev/null || true
                 # Create timestamped snapshot
                 snapshot_name=\"vault_\$(date +%Y%m%d_%H%M%S)\"
-                cp -r \"$vault_dir\" \"$backup_dir/\$snapshot_name\" 2>/dev/null || true
+                cp -r \"\$vault_dir\" \"\$backup_dir/\$snapshot_name\" 2>/dev/null || true
                 # Keep only last 10 snapshots
-                cd \"$backup_dir\"
+                cd \"\$backup_dir\" 2>/dev/null || continue
                 ls -dt vault_* 2>/dev/null | tail -n +11 | xargs rm -rf 2>/dev/null || true
-                echo \"\$(date): Vault sync completed\" >> \"$LOG_FILE\"
+                echo \"\$(date): Vault sync completed\" >> \"\$log_file\"
             fi
             sleep 1800  # Sync every 30 minutes
         done
