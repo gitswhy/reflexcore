@@ -87,15 +87,6 @@ def write_text_file(path, data):
     with open(path, 'w') as f:
         f.write(data)
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='Gitswhy Vault Manager')
-    parser.add_argument('--operation', required=True, choices=['store', 'retrieve'], help='Operation: store or retrieve')
-    parser.add_argument('--input-file', help='Input file (for store)')
-    parser.add_argument('--vault-file', required=True, help='Vault file path')
-    parser.add_argument('--config', required=True, help='YAML config file')
-    parser.add_argument('--output-format', default='json', choices=['json', 'summary'], help='Output format for retrieve')
-    return parser.parse_args()
-
 def analyze_vault(vault_file, config_path, password=None, keyword=None, start_time=None, end_time=None):
     """
     Automatically decrypts the vault (if needed) and performs analytics.
@@ -178,40 +169,43 @@ def analyze_vault(vault_file, config_path, password=None, keyword=None, start_ti
             print(json.dumps(results, indent=2))
         return {'count': count, 'events': results}
     except Exception as e:
-        print(f"[ERROR] Unexpected error during analytics: {str(e)}")
+        print(f"[ERROR] Analytics failed: {str(e)}")
         return {'count': 0, 'events': []}
 
-# --- Basic Open-Source Vault Analytics (Built-in Python only) ---
 def analyze_vault_builtin(vault_file, keyword=None, start_time=None, end_time=None):
     """
-    Basic analytics: search and count events by keyword and timestamp.
-    Only uses built-in Python. Assumes vault_file is already decrypted JSON (list of dicts).
+    Analyze plain JSON vault files (no encryption).
     """
-    import json
-    from datetime import datetime
-
     try:
-        with open(vault_file, "r") as f:
-            data = json.load(f)
-        if not isinstance(data, list):
-            print("[Error] Vault data is not a list of events.")
+        if not os.path.exists(vault_file):
+            print(f"[ERROR] Vault file not found: {vault_file}")
             return []
-
+        with open(vault_file, 'r') as f:
+            data = json.load(f)
+        events = data if isinstance(data, list) else data.get('data', [])
         results = []
         count = 0
-        for event in data:
+        for event in events:
             match = True
-            # Keyword search (case-insensitive)
             if keyword and keyword.lower() not in str(event).lower():
                 match = False
-            # Timestamp filtering (string comparison, assumes ISO format)
             if start_time:
-                event_time = event.get("timestamp")
-                if event_time and event_time < start_time:
+                try:
+                    start_dt = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+                    event_dt = datetime.strptime(event.get('timestamp', ''), '%Y-%m-%d %H:%M:%S')
+                    if event_dt < start_dt:
+                        match = False
+                except Exception:
+                    print("[WARN] Invalid start_time or event timestamp format.")
                     match = False
             if end_time:
-                event_time = event.get("timestamp")
-                if event_time and event_time > end_time:
+                try:
+                    end_dt = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+                    event_dt = datetime.strptime(event.get('timestamp', ''), '%Y-%m-%d %H:%M:%S')
+                    if event_dt > end_dt:
+                        match = False
+                except Exception:
+                    print("[WARN] Invalid end_time or event timestamp format.")
                     match = False
             if match:
                 results.append(event)
@@ -223,13 +217,6 @@ def analyze_vault_builtin(vault_file, keyword=None, start_time=None, end_time=No
     except Exception as e:
         print(f"[Error] Analytics failed: {str(e)}")
         return []
-
-# --- CLI integration for built-in analytics ---
-# Usage: --operation analyze_builtin --vault-file <decrypted_json_file> [--keyword ...] [--start_time ...] [--end_time ...]
-# 3-step test plan:
-# 1. echo '[{"timestamp": "2025-07-23 10:01:00", "event": "hesitation", "details": "test"}]' > ~/test_data.json
-# 2. python3 gitswhy_vault_manager.py --operation analyze_builtin --vault-file ~/test_data.json --keyword "hesitation"
-# 3. Verify output: should print Found 1 matching events.
 
 def main():
     parser = argparse.ArgumentParser(description='Gitswhy Vault Manager')
