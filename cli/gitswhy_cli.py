@@ -16,6 +16,7 @@ import os
 import sys
 import subprocess
 import json
+import platform
 from pathlib import Path
 from typing import Optional, Dict, Any
 
@@ -27,6 +28,11 @@ try:
     from gitswhy_vault_manager import VaultManager
 except ImportError:
     VaultManager = None
+
+# Platform detection
+IS_WINDOWS = platform.system().lower() == "windows"
+IS_LINUX = platform.system().lower() == "linux"
+IS_MACOS = platform.system().lower() == "darwin"
 
 class Colors:
     HEADER = '\033[95m'
@@ -43,17 +49,26 @@ def print_colored(message: str, color: str = Colors.GREEN) -> None:
     click.echo(f"{color}{message}{Colors.END}")
 
 def run_script(script_path: str, args: list = None, sudo: bool = False) -> bool:
+    """Run a shell script with platform-specific handling"""
     try:
         full_path = PROJECT_ROOT / script_path
         if not full_path.exists():
             print_colored(f"ERROR: Script not found: {full_path}", Colors.RED)
             return False
+        
+        # Windows compatibility check
+        if IS_WINDOWS and script_path.endswith('.sh'):
+            print_colored(f"⚠️  Shell script '{script_path}' not supported on Windows", Colors.YELLOW)
+            print_colored("💡 Use WSL (Windows Subsystem for Linux) for full functionality", Colors.BLUE)
+            return False
+        
         cmd = []
-        if sudo:
+        if sudo and not IS_WINDOWS:
             cmd.append('sudo')
         cmd.append(str(full_path))
         if args:
             cmd.extend(args)
+        
         result = subprocess.run(cmd, capture_output=False, text=True)
         return result.returncode == 0
     except subprocess.CalledProcessError as e:
@@ -81,7 +96,8 @@ def get_script_status(script_name: str) -> Dict[str, Any]:
         'name': script_name,
         'path': str(script_path),
         'exists': script_path.exists(),
-        'executable': script_path.exists() and os.access(script_path, os.X_OK)
+        'executable': script_path.exists() and os.access(script_path, os.X_OK),
+        'platform_supported': not (IS_WINDOWS and script_path.suffix == '.sh')
     }
 
 @click.group()
@@ -98,9 +114,8 @@ def cli(ctx: click.Context, verbose: bool, config: str) -> None:
     ctx.obj['config'] = config
     ctx.obj['project_root'] = PROJECT_ROOT
     if verbose:
-        print_colored(f"Gitswhy ReflexCore CLI v1.0.0", Colors.HEADER)
+        print_colored(f"Platform: {platform.system()}", Colors.BLUE)
         print_colored(f"Project root: {PROJECT_ROOT}", Colors.BLUE)
-        print_colored(f"Config file: {config}", Colors.BLUE)
 
 @cli.command()
 @click.option('--force', is_flag=True, help='Force initialization even if already configured')
@@ -108,15 +123,31 @@ def cli(ctx: click.Context, verbose: bool, config: str) -> None:
 def init(ctx: click.Context, force: bool) -> None:
     """Initialize ReflexCore background services and configuration."""
     print_colored("🚀 Initializing Gitswhy ReflexCore...", Colors.HEADER)
+    
+    if IS_WINDOWS:
+        print_colored("⚠️  Windows detected - limited functionality available", Colors.YELLOW)
+        print_colored("💡 Shell scripts require WSL (Windows Subsystem for Linux)", Colors.BLUE)
+        print_colored("✅ Python components will work normally", Colors.GREEN)
+    
     if not check_config_exists() and not force:
         print_colored("⚠️  Configuration file not found. Creating default config...", Colors.YELLOW)
+    
     try:
-        success = run_script('scripts/gitswhy_initiate.sh', ['start'])
-        if success:
-            print_colored("✅ ReflexCore initialization completed successfully!", Colors.GREEN)
+        if IS_WINDOWS:
+            # On Windows, just create the vault directory and show status
+            vault_dir = Path.home() / ".gitswhy"
+            vault_dir.mkdir(exist_ok=True)
+            print_colored(f"✅ Created vault directory: {vault_dir}", Colors.GREEN)
+            print_colored("✅ ReflexCore Python components initialized!", Colors.GREEN)
+            print_colored("💡 Use 'python cli/gitswhy_cli.py status' to check system status", Colors.BLUE)
         else:
-            print_colored("❌ ReflexCore initialization failed!", Colors.RED)
-            raise click.ClickException("Initialization failed")
+            # On Linux/macOS, run the full initialization script
+            success = run_script('scripts/gitswhy_initiate.sh', ['start'])
+            if success:
+                print_colored("✅ ReflexCore initialization completed successfully!", Colors.GREEN)
+            else:
+                print_colored("❌ ReflexCore initialization failed!", Colors.RED)
+                raise click.ClickException("Initialization failed")
     except Exception as e:
         if ctx.obj and ctx.obj.get('verbose'):
             print_colored(f"Error details: {e}", Colors.RED)
@@ -127,6 +158,11 @@ def init(ctx: click.Context, force: bool) -> None:
 @click.pass_context
 def overclock(ctx: click.Context, restore: bool) -> None:
     """Apply or restore system overclocking optimizations."""
+    if IS_WINDOWS:
+        print_colored("⚠️  System optimization not available on Windows", Colors.YELLOW)
+        print_colored("💡 Use WSL for full system optimization features", Colors.BLUE)
+        return
+    
     if restore:
         print_colored("🔄 Restoring original system parameters...", Colors.YELLOW)
         success = run_script('scripts/gitswhy_gpuoverclock.sh', ['restore'], sudo=True)
@@ -145,6 +181,11 @@ def overclock(ctx: click.Context, restore: bool) -> None:
 @click.pass_context
 def flush(ctx: click.Context, test: bool) -> None:
     """Initiate a quantum system flush to clear memory."""
+    if IS_WINDOWS:
+        print_colored("⚠️  System flush not available on Windows", Colors.YELLOW)
+        print_colored("💡 Use WSL for system optimization features", Colors.BLUE)
+        return
+    
     print_colored("🌊 Initiating quantum system flush...", Colors.HEADER)
     args = ['test'] if test else ['flush']
     success = run_script('scripts/gitswhy_quantumflush.sh', args, sudo=True)
@@ -159,6 +200,11 @@ def flush(ctx: click.Context, test: bool) -> None:
 @click.pass_context
 def clean(ctx: click.Context, aggressive: bool) -> None:
     """Perform aggressive system cleanup operations."""
+    if IS_WINDOWS:
+        print_colored("⚠️  System cleanup not available on Windows", Colors.YELLOW)
+        print_colored("💡 Use WSL for system maintenance features", Colors.BLUE)
+        return
+    
     print_colored("🧹 Starting system cleanup operations...", Colors.HEADER)
     args = ['clean']
     success = run_script('scripts/gitswhy_autoclean.sh', args, sudo=True)
@@ -173,6 +219,11 @@ def clean(ctx: click.Context, aggressive: bool) -> None:
 @click.pass_context
 def mirror(ctx: click.Context, timeout: int) -> None:
     """Start Core Mirror keystroke monitoring to track user activity."""
+    if IS_WINDOWS:
+        print_colored("⚠️  Keystroke monitoring not available on Windows", Colors.YELLOW)
+        print_colored("💡 Use WSL for keystroke monitoring features", Colors.BLUE)
+        return
+    
     print_colored("👁️  Starting Core Mirror keystroke monitoring...", Colors.HEADER)
     print_colored(f"Monitoring timeout: {timeout} seconds", Colors.BLUE)
     try:
@@ -196,13 +247,18 @@ def mirror(ctx: click.Context, timeout: int) -> None:
 @click.pass_context
 def syncvault(ctx: click.Context, force: bool) -> None:
     """Synchronize events to an encrypted vault for persistence."""
+    if IS_WINDOWS:
+        print_colored("⚠️  Vault sync not available on Windows", Colors.YELLOW)
+        print_colored("💡 Use WSL for vault synchronization features", Colors.BLUE)
+        return
+    
     print_colored("🔒 Synchronizing events to encrypted vault...", Colors.HEADER)
     success = run_script('scripts/gitswhy_vaultsync.sh', ['sync'])
     if success:
         print_colored("✅ Vault synchronization completed!", Colors.GREEN)
     else:
         print_colored("❌ Vault synchronization failed!", Colors.RED)
-        raise click.ClickException("Vault sync operation failed")
+        raise click.ClickException("Vault synchronization failed")
 
 @cli.command()
 @click.option('--format', type=click.Choice(['json', 'summary', 'events']), 
