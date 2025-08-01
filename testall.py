@@ -4,6 +4,7 @@ import json
 import pytest
 import tempfile
 import shutil
+import sys
 
 def run(cmd):
     """Helper function to run shell commands and return results"""
@@ -50,31 +51,36 @@ def config_file():
     """Get config file path"""
     return "config/gitswhy_config.yaml"
 
-def test_vault_store_operation(test_data_file, vault_file, config_file):
+@pytest.fixture(scope="session")
+def python_cmd():
+    """Get the correct python command for the platform"""
+    return "python" if sys.platform.startswith("win") else "python3"
+
+def test_vault_store_operation(test_data_file, vault_file, config_file, python_cmd):
     """Test storing data in vault"""
     print(f"Testing vault store operation...")
-    result = run(f"python3 gitswhy_vault_manager.py --config {config_file} --vault-file {vault_file} --operation store --input-file {test_data_file}")
+    result = run(f'{python_cmd} gitswhy_vault_manager.py --config "{config_file}" --vault-file "{vault_file}" --operation store --input-file "{test_data_file}"')
     assert result.returncode == 0, f"Vault store operation failed: {result.stderr}"
     print("✓ Vault store operation completed successfully")
 
-def test_vault_retrieve_operation(vault_file, config_file):
+def test_vault_retrieve_operation(vault_file, config_file, python_cmd):
     """Test retrieving data from vault"""
     print(f"Testing vault retrieve operation...")
-    result = run(f"python3 gitswhy_vault_manager.py --config {config_file} --vault-file {vault_file} --operation retrieve")
+    result = run(f'{python_cmd} gitswhy_vault_manager.py --config "{config_file}" --vault-file "{vault_file}" --operation retrieve')
     assert result.returncode == 0, f"Vault retrieve operation failed: {result.stderr}"
     print("✓ Vault retrieve operation completed successfully")
 
-def test_vault_analyze_operation(vault_file, config_file):
+def test_vault_analyze_operation(vault_file, config_file, python_cmd):
     """Test analyzing encrypted vault"""
     print(f"Testing vault analyze operation...")
-    result = run(f"python3 gitswhy_vault_manager.py --config {config_file} --vault-file {vault_file} --operation analyze --keyword hesitation")
+    result = run(f'{python_cmd} gitswhy_vault_manager.py --config "{config_file}" --vault-file "{vault_file}" --operation analyze --keyword hesitation')
     assert result.returncode == 0, f"Vault analyze operation failed: {result.stderr}"
     print("✓ Vault analyze operation completed successfully")
 
-def test_vault_analyze_builtin_operation(test_data_file, config_file):
+def test_vault_analyze_builtin_operation(test_data_file, config_file, python_cmd):
     """Test analyzing plain JSON data"""
     print(f"Testing vault analyze_builtin operation...")
-    result = run(f"python3 gitswhy_vault_manager.py --operation analyze_builtin --vault-file {test_data_file} --keyword hesitation --config {config_file}")
+    result = run(f'{python_cmd} gitswhy_vault_manager.py --operation analyze_builtin --vault-file "{test_data_file}" --keyword hesitation --config "{config_file}"')
     assert result.returncode == 0, f"Vault analyze_builtin operation failed: {result.stderr}"
     print("✓ Vault analyze_builtin operation completed successfully")
 
