@@ -63,7 +63,7 @@ jobs:
 
     - name: Run Python tests
       run: |
-        python3 -m pytest testall.py -v
+        python3 testall.py
 
     - name: Run full test suite
       env:
