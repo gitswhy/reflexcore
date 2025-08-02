@@ -27,7 +27,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+NC='\033[0m' # No Colo
 
 # Default values
 HESITATION_THRESHOLD=2.0
@@ -239,8 +239,7 @@ monitor_keystrokes() {
             continue
         fi
         
-        # Process keystroke
-        timeout_count=0
+        # Increment counte
         ((keystroke_count++))
         
         if check_hesitation "$current_time" "$keystroke"; then
