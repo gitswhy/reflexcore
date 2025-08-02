@@ -220,14 +220,34 @@ def clean(ctx: click.Context, aggressive: bool) -> None:
 def mirror(ctx: click.Context, timeout: int) -> None:
     """Start Core Mirror keystroke monitoring to track user activity."""
     if IS_WINDOWS:
-        print_colored("⚠️  Keystroke monitoring not available on Windows", Colors.YELLOW)
-        print_colored("💡 Use WSL for keystroke monitoring features", Colors.BLUE)
-        return
+        print_colored("⚠️  Running keystroke monitoring via WSL...", Colors.YELLOW)
+        print_colored("💡 Make sure WSL is installed and Ubuntu is available", Colors.BLUE)
+        
+        # Check if WSL is available
+        try:
+            result = subprocess.run(['wsl', '--list', '--quiet'], capture_output=True, text=True, timeout=10)
+            if result.returncode != 0 or not result.stdout.strip():
+                print_colored("❌ WSL not available or no distributions found", Colors.RED)
+                print_colored("💡 Install WSL with: wsl --install", Colors.BLUE)
+                return
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            print_colored("❌ WSL not available", Colors.RED)
+            print_colored("💡 Install WSL with: wsl --install", Colors.BLUE)
+            return
     
     print_colored("👁️  Starting Core Mirror keystroke monitoring...", Colors.HEADER)
     print_colored(f"Monitoring timeout: {timeout} seconds", Colors.BLUE)
+    
     try:
-        cmd = ['timeout', str(timeout), str(PROJECT_ROOT / 'modules/gitswhy_coremirror.sh')]
+        if IS_WINDOWS:
+            # Use WSL to run the script
+            script_path = str(PROJECT_ROOT / 'modules/gitswhy_coremirror.sh')
+            # Convert Windows path to WSL path
+            wsl_path = script_path.replace('C:', '/mnt/c').replace('\\', '/')
+            cmd = ['wsl', '-d', 'Ubuntu', 'timeout', str(timeout), 'bash', wsl_path]
+        else:
+            cmd = ['timeout', str(timeout), str(PROJECT_ROOT / 'modules/gitswhy_coremirror.sh')]
+        
         result = subprocess.run(cmd, capture_output=False, text=True)
         if result.returncode == 0:
             print_colored("✅ Keystroke monitoring completed!", Colors.GREEN)

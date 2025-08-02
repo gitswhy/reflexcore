@@ -201,6 +201,12 @@ setup_signal_traps() {
 read_keystroke() {
     local char
     
+    # Check if we're in an interactive terminal
+    if [[ ! -t 0 ]]; then
+        echo "TIMEOUT"
+        return
+    fi
+    
     # Try to read with timeout first
     if command -v timeout >/dev/null 2>&1; then
         char=$(timeout 1s dd bs=1 count=1 2>/dev/null || echo "")
@@ -319,6 +325,11 @@ monitor_keystrokes() {
             break
         fi
         
+        # Handle timeout (no input)
+        if [[ "$keystroke" == "TIMEOUT" ]]; then
+            continue
+        fi
+        
         # Increment counter
         ((keystroke_count++))
         
@@ -404,6 +415,14 @@ main() {
     if [[ "$MONITORING_ENABLED" != "true" ]]; then
         echo -e "${YELLOW}[WARN]${NC} Keystroke monitoring is disabled in configuration"
         exit 0
+    fi
+    
+    # Check if we're in an interactive terminal
+    if [[ ! -t 0 ]]; then
+        echo -e "${YELLOW}[WARN]${NC} Not running in interactive terminal. Keystroke monitoring requires interactive mode."
+        echo -e "${YELLOW}[WARN]${NC} Please run this script in a terminal window, not in a script or non-interactive environment."
+        log_json_event "error" "Non-interactive terminal detected" "0"
+        exit 1
     fi
     
     # Set up signal handling for clean exit
