@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Unified CLI**: Comprehensive command-line interface for all operations
 
 #### **Scripts and Modules**
-- `modules/gitswhy_coremirror.sh` - Core keystroke monitoring and hesitation detection
+- `modules/keystroke_monitor_v2.sh` - Core keystroke monitoring and hesitation detection
 - `scripts/gitswhy_initiate.sh` - System initialization and background process management
 - `scripts/gitswhy_gpuoverclock.sh` - GPU and system performance optimization
 - `scripts/gitswhy_quantumflush.sh` - Advanced entropy and cache management

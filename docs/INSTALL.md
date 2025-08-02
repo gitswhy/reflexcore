@@ -166,8 +166,8 @@ python -m pytest testall.py -v   # Windows
 sudo ./test_all.sh
 
 # Run individual script tests
-modules/gitswhy_coremirror.sh status
-modules/gitswhy_coremirror.sh test
+modules/keystroke_monitor_v2.sh status
+modules/keystroke_monitor_v2.sh test
 ```
 
 ### **Windows System Tests (WSL Required)**
@@ -219,7 +219,7 @@ python3 cli/gitswhy_cli.py clean
 python3 cli/gitswhy_cli.py status
 
 # Test keystroke monitoring
-modules/gitswhy_coremirror.sh monitor &
+modules/keystroke_monitor_v2.sh monitor &
 
 # Check logs
 cat ~/.gitswhy/events.log
@@ -343,7 +343,7 @@ ls -la scripts/*.sh modules/*.sh
 python3 cli/gitswhy_cli.py --help
 
 # Test shell scripts
-./modules/gitswhy_coremirror.sh status
+./modules/keystroke_monitor_v2.sh status
 
 # Run tests
 python3 -m pytest testall.py -v

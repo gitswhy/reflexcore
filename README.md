@@ -46,7 +46,7 @@ Think of it as your **AI-powered system companion** that runs silently in the ba
 # ✅ ALL COMMANDS WORK - Full ReflexCore Experience
 # Shell scripts (native support)
 ./scripts/gitswhy_initiate.sh
-./modules/gitswhy_coremirror.sh monitor
+./modules/keystroke_monitor_v2.sh monitor
 ./scripts/gitswhy_gpuoverclock.sh
 
 # Python commands (cross-platform)
@@ -116,7 +116,7 @@ That's it! ReflexCore is now running in the background, enhancing your developme
 
 ```
 ReflexCore
-├── Core Monitoring (modules/gitswhy_coremirror.sh)
+├── Core Monitoring (modules/keystroke_monitor_v2.sh)
 ├── Performance Optimization (scripts/gitswhy_gpuoverclock.sh)
 ├── System Maintenance (scripts/gitswhy_autoclean.sh)
 ├── Entropy Management (scripts/gitswhy_quantumflush.sh)
@@ -166,10 +166,10 @@ ReflexCore
 3. **Test Keystroke Monitoring**
    ```bash
    # Check script status first
-   modules/gitswhy_coremirror.sh status
+   modules/keystroke_monitor_v2.sh status
    
    # Run the monitoring script in background
-   modules/gitswhy_coremirror.sh monitor &
+   modules/keystroke_monitor_v2.sh monitor &
    
    # Test by typing with pauses (in the same terminal)
    echo "Type something with a pause..." # Pause 2-3 seconds while typing
@@ -178,7 +178,7 @@ ReflexCore
    cat ~/.gitswhy/events.log
    
    # Or use the built-in logs command
-   modules/gitswhy_coremirror.sh logs
+   modules/keystroke_monitor_v2.sh logs
    ```
 
 4. **Test Performance Optimization**
@@ -232,23 +232,23 @@ python3 cli/gitswhy_cli.py restart
 
 ## 🧠 Core Mirror Script Usage
 
-The `modules/gitswhy_coremirror.sh` script provides advanced keystroke monitoring and hesitation detection:
+The `modules/keystroke_monitor_v2.sh` script provides advanced keystroke monitoring and hesitation detection:
 
 ```bash
 # Check script status and configuration
-modules/gitswhy_coremirror.sh status
+modules/keystroke_monitor_v2.sh status
 
 # Start keystroke monitoring (default)
-modules/gitswhy_coremirror.sh monitor
+modules/keystroke_monitor_v2.sh monitor
 
 # Run test monitoring sequence
-modules/gitswhy_coremirror.sh test
+modules/keystroke_monitor_v2.sh test
 
 # View recent monitoring events
-modules/gitswhy_coremirror.sh logs
+modules/keystroke_monitor_v2.sh logs
 
 # Run in background
-modules/gitswhy_coremirror.sh monitor &
+modules/keystroke_monitor_v2.sh monitor &
 ```
 
 ### **Core Mirror Features**

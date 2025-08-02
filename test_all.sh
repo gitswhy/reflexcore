@@ -101,9 +101,9 @@ test_coremirror() {
     print_header "Testing Core Mirror Keystroke Monitoring"
     set +e  # Don't fail on errors
     # Run monitoring for 5 seconds
-    bash "$PROJECT_ROOT/modules/gitswhy_coremirror.sh" test &
+    bash "$PROJECT_ROOT/modules/keystroke_monitor_v2.sh" test &
     sleep 6
-    pkill -f gitswhy_coremirror.sh || true
+    pkill -f keystroke_monitor_v2.sh || true
     set -e
     
     if [[ -f "$EVENTS_LOG" ]]; then

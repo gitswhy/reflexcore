@@ -30,7 +30,7 @@ ReflexCore/
 ├── 📁 docs/                        # Documentation
 │   └── 📚 INSTALL.md              # Installation guide
 ├── 📁 modules/                     # Core modules
-│   └── 🧠 gitswhy_coremirror.sh   # Keystroke monitoring
+│   └── 🧠 keystroke_monitor_v2.sh # Keystroke monitoring
 ├── 📁 scripts/                     # System scripts
 │   ├── 🚀 gitswhy_initiate.sh     # System initialization
 │   ├── ⚡ gitswhy_gpuoverclock.sh  # Performance optimization
@@ -53,7 +53,7 @@ ReflexCore/
 - **`test_all.sh`** - System integration tests
 
 ### **Core Scripts**
-- **`modules/gitswhy_coremirror.sh`** - Real-time keystroke monitoring
+- **`modules/keystroke_monitor_v2.sh`** - Real-time keystroke monitoring
 - **`scripts/gitswhy_initiate.sh`** - System initialization and background processes
 - **`scripts/gitswhy_gpuoverclock.sh`** - Performance optimization
 - **`scripts/gitswhy_quantumflush.sh`** - Entropy and cache management
@@ -118,7 +118,7 @@ python3 cli/gitswhy_cli.py mirror
 ### **Core Scripts**
 | File | Purpose | Size |
 |------|---------|------|
-| `modules/gitswhy_coremirror.sh` | Keystroke monitoring | 15KB |
+| `modules/keystroke_monitor_v2.sh` | Keystroke monitoring | 15KB |
 | `scripts/gitswhy_initiate.sh` | System initialization | 18KB |
 | `scripts/gitswhy_gpuoverclock.sh` | Performance optimization | 15KB |
 | `scripts/gitswhy_quantumflush.sh` | Entropy management | 21KB |
