@@ -232,10 +232,8 @@ def mirror(ctx: click.Context, timeout: int) -> None:
     
     try:
         if IS_WINDOWS:
-            # Use WSL to run the script
-            script_path = str(PROJECT_ROOT / 'modules/keystroke_monitor_v2.sh')
-            # Convert Windows path to WSL path
-            wsl_path = script_path.replace('C:', '/mnt/c').replace('\\', '/')
+            # Use WSL to run the script from the reflexcore directory
+            wsl_path = "/mnt/c/Users/Sujal Malviya/reflexcore/modules/keystroke_monitor_v2.sh"
             # Don't use external timeout, let the script handle non-interactive mode
             cmd = ['wsl', '-d', 'Ubuntu', 'bash', wsl_path]
         else:
