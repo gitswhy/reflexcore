@@ -88,7 +88,7 @@ def get_script_status(script_name: str) -> Dict[str, Any]:
         'overclock': 'scripts/gitswhy_gpuoverclock.sh',
         'flush': 'scripts/gitswhy_quantumflush.sh',
         'clean': 'scripts/gitswhy_autoclean.sh',
-        'mirror': 'modules/gitswhy_coremirror.sh',
+        'mirror': 'modules/keystroke_monitor_v2.sh',
         'syncvault': 'scripts/gitswhy_vaultsync.sh'
     }
     script_path = PROJECT_ROOT / script_paths.get(script_name, '')
@@ -222,31 +222,24 @@ def mirror(ctx: click.Context, timeout: int) -> None:
     if IS_WINDOWS:
         print_colored("⚠️  Running keystroke monitoring via WSL...", Colors.YELLOW)
         print_colored("💡 Make sure WSL is installed and Ubuntu is available", Colors.BLUE)
-        
-        # Check if WSL is available
-        try:
-            result = subprocess.run(['wsl', '--list', '--quiet'], capture_output=True, text=True, timeout=10)
-            if result.returncode != 0 or not result.stdout.strip():
-                print_colored("❌ WSL not available or no distributions found", Colors.RED)
-                print_colored("💡 Install WSL with: wsl --install", Colors.BLUE)
-                return
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            print_colored("❌ WSL not available", Colors.RED)
-            print_colored("💡 Install WSL with: wsl --install", Colors.BLUE)
-            return
+        print_colored("💡 For best results, run directly in WSL terminal:", Colors.CYAN)
+        print_colored("   wsl -d Ubuntu", Colors.GREEN)
+        print_colored("   cd /mnt/c/Users/Sujal\\ Malviya/reflexcore", Colors.GREEN)
+        print_colored("   bash modules/keystroke_monitor_v2.sh", Colors.GREEN)
     
-    print_colored("👁️  Starting Core Mirror keystroke monitoring...", Colors.HEADER)
+    print_colored("👁️  Starting Keystroke Monitor v2...", Colors.HEADER)
     print_colored(f"Monitoring timeout: {timeout} seconds", Colors.BLUE)
     
     try:
         if IS_WINDOWS:
             # Use WSL to run the script
-            script_path = str(PROJECT_ROOT / 'modules/gitswhy_coremirror.sh')
+            script_path = str(PROJECT_ROOT / 'modules/keystroke_monitor_v2.sh')
             # Convert Windows path to WSL path
             wsl_path = script_path.replace('C:', '/mnt/c').replace('\\', '/')
-            cmd = ['wsl', '-d', 'Ubuntu', 'timeout', str(timeout), 'bash', wsl_path]
+            # Don't use external timeout, let the script handle non-interactive mode
+            cmd = ['wsl', '-d', 'Ubuntu', 'bash', wsl_path]
         else:
-            cmd = ['timeout', str(timeout), str(PROJECT_ROOT / 'modules/gitswhy_coremirror.sh')]
+            cmd = ['timeout', str(timeout), str(PROJECT_ROOT / 'modules/keystroke_monitor_v2.sh')]
         
         result = subprocess.run(cmd, capture_output=False, text=True)
         if result.returncode == 0:
@@ -255,6 +248,9 @@ def mirror(ctx: click.Context, timeout: int) -> None:
             print_colored("⏰ Monitoring stopped due to timeout", Colors.YELLOW)
         else:
             print_colored("❌ Keystroke monitoring failed!", Colors.RED)
+            if IS_WINDOWS:
+                print_colored("💡 This is expected when running through WSL from PowerShell", Colors.CYAN)
+                print_colored("💡 Try running directly in WSL terminal for full functionality", Colors.BLUE)
     except KeyboardInterrupt:
         print_colored("\n⏹️  Monitoring stopped by user", Colors.YELLOW)
     except Exception as e:
