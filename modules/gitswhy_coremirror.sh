@@ -33,7 +33,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+NC='\033[0m' # No Colo
 
 # Default values if config is missing
 DEFAULT_HESITATION_THRESHOLD=2.0
@@ -199,7 +199,7 @@ setup_signal_traps() {
 
 # Read single character in raw mode
 read_keystroke() {
-    local char
+    local cha
     
     # Check if we're in an interactive terminal
     if [[ ! -t 0 ]]; then
@@ -249,7 +249,7 @@ read_keystroke() {
             echo "UNKNOWN"
             ;;
         *) # Regular characters
-            # Check if printable character
+            # Check if printable characte
             if [[ "$char" =~ [[:print:]] ]]; then
                 echo "$char"
             else
@@ -330,7 +330,7 @@ monitor_keystrokes() {
             continue
         fi
         
-        # Increment counter
+        # Increment counte
         ((keystroke_count++))
         
         # Check for hesitation and update counters
